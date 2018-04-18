@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<script>
+			function getParamVal(name){
+			     var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+			     var r = window.location.search.substr(1).match(reg);
+			     if(r!=null)return  unescape(r[2]); return null;
+			}
+			var qrcode = encodeURIComponent(getParamVal("qrcode"));
+
+			console.log(qrcode);
+			<!--测试环境跳转地址--->
+			//window.location.href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxdc347549bbfb2a24&redirect_uri=http://invoice-weixin-test.starpos.com.cn/weixin/OAuthQueryInfoServlet?qrcode="+ qrcode +"&response_type=code&scope=snsapi_base&state=HEAT#wechat_redirect";
+			<!--生产环境跳转地址-->
+			window.location.href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5b32bce922c2ac7c&redirect_uri=http://gateway.starpos.com.cn/adpweb/invoice-weixin/weixin/OAuthQueryInfoServlet?qrcode="+ qrcode + "&response_type=code&scope=snsapi_base&state=HEAT#wechat_redirect";
+			
+		</script>
+	</head>
+	<body>
+	</body>
+</html>

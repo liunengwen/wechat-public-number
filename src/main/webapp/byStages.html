@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<!--<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>-->
+	<script>
+
+		function getUrlParams(param) {
+			var qs = location.search.length > 0 ? location.search.substring(1) : ""
+			var args = {}
+			var name = null
+			var value = null
+
+			console.log("转换前:" + qs)
+			if (qs.indexOf("%20") != -1) {
+				qs = qs.replace(/%20/g, "%2B")
+			}
+			console.log("转换后:" + qs)
+
+			//以&为界，切割字符串
+			var item1 = qs.length ? qs.split("&") : []
+			var item2 = null;
+
+			//遍历数组，二次切割，以=为界
+			for (var i = 0; i < item1.length; i++) {
+				item2 = item1[i].split("=")
+				name = decodeURIComponent(item2[0])
+				value = decodeURIComponent(item2[1])
+				if (item2.length) {
+					args[name] = value
+				}
+			}
+			return args[param];
+		};
+		var orderId = getUrlParams("qrCode");
+
+		console.log(orderId);
+
+		<!--测试环境跳转地址--->
+		//window.location.href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxdc347549bbfb2a24&redirect_uri=http://invoice-weixin-test.starpos.com.cn/weixin/OAuthStagesServlet?orderId="+orderId+"&response_type=code&scope=snsapi_base&state=HEAT#wechat_redirect";
+		<!--生产环境跳转地址-->
+		window.location.href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5b32bce922c2ac7c&redirect_uri=http://gateway.starpos.com.cn/adpweb/invoice-weixin/weixin/OAuthStagesServlet?orderId="+orderId+"&response_type=code&scope=snsapi_base&state=HEAT#wechat_redirect";
+
+	</script>
+</head>
+
+<body>
+</body>
+
+</html>

@@ -30,8 +30,13 @@ public class PropertyInfoService {
 	}
 	
 	//会员-扫码后重定向地址
-	public static String getMemberAppUrl(String code, String openId, String qrCode) {
-		return ((String) PropertyPlaceholder.getProperty("member_app_url")).replace("CODE", code).replace("OPENID", openId).replace("QRNO", qrCode);
+	public static String getMemberAppUrl(String code, String openId, String qrCode,String type) {
+		return ((String) PropertyPlaceholder.getProperty("member_app_url")).replace("CODE", code).replace("OPENID", openId).replace("QRNO", qrCode).replace("TYPE", type);
+	}
+	
+	//会员-扫码后重定向地址(收银台)
+	public static String getMemberAppUrlByCaiShen(String code, String openId, String qrCode,String type) {
+		return ((String) PropertyPlaceholder.getProperty("member_caishen_url")).replace("CODE", code).replace("OPENID", openId).replace("QRNO", qrCode).replace("TYPE", type);
 	}
 	
 	//会员-扫台牌输入金额后，重定向地址

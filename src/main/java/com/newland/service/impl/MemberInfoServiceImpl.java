@@ -1,6 +1,7 @@
 package com.newland.service.impl;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,6 +47,7 @@ public class MemberInfoServiceImpl implements MemberInfoService{
 		String paychannel= null;
 		String txncnl= null;
 		String qrCode= null;
+		String v= null;
 		
 		String str = request.getParameter("str");
 		log.info("==============[getMemberInfoAndUserOpenId],会员-扫码 获取请求参数str="+str);
@@ -54,16 +56,18 @@ public class MemberInfoServiceImpl implements MemberInfoService{
 		String[] aa =bb.split("\\/");
 		log.info("==============[getMemberInfoAndUserOpenId],会员-扫码 请求参数 按/分割后数组长度，aa="+aa.length);
 		//扫二维码调用
-		if(aa.length<=2){
+		if(aa.length<=3){
 			for(int i =0 ;i<aa.length;i++){
 				String cc[] = aa[i].split("\\=");
 				if(cc[0].equals("qrCode")){
 					qrCode = cc[1];
 				}else if (cc[0].equals("sysCode")){
 					sysCode = cc[1];
+				}else if (cc[0].equals("v")){
+					v = cc[1];
 				}
 			}
-			log.info("==============[getMemberInfoAndUserOpenId],会员-app扫码,请求参数：qrCode="+qrCode+",sysCode="+sysCode);
+			log.info("==============[getMemberInfoAndUserOpenId],会员-app扫码,请求参数：qrCode="+qrCode+",sysCode="+sysCode+",v="+v);
 		}else{
 			//扫台牌调用
 			for(int i =0 ;i<aa.length;i++){
@@ -98,31 +102,18 @@ public class MemberInfoServiceImpl implements MemberInfoService{
 			OAuthInfo oa = WeixinUtil.getOAuthOpenId(appid,secret,code);
 			if(!"".equals(oa) && null != oa){
 				if("app".equals(sysCode)){
-					String appUrl = PropertyInfoService.getMemberAppUrl(code, oa.getOpenId(), qrCode);
+					String appUrl =null;
+					if("caishen".equals(v) || "undefined".equals(v)){
+						appUrl = PropertyInfoService.getMemberAppUrlByCaiShen(code, oa.getOpenId(), qrCode,v);
+					}else{
+						appUrl = PropertyInfoService.getMemberAppUrl(code, oa.getOpenId(), qrCode,v);
+					}
 					log.info("==============[getMemberInfoAndUserOpenId]，会员-扫二维码，跳转h5地址="+appUrl);
-					response.sendRedirect(appUrl);
-					//测试环境跳转路径
-					//log.info("==============[OAuthMemberServlet]测试环境，跳转h5地址="+"https://bystages-test.starpos.com.cn:9443/?code="+code+"&openId="+oa.getOpenId()+"&qrCode="+qrCode);
-					//response.sendRedirect("https://bystages-test.starpos.com.cn:9443/?code="+code+"&openId="+oa.getOpenId()+"&qrCode="+qrCode);
-					//生产环境跳转路径
-					/*log.info("==============[getMemberInfoAndUserOpenId]生产环境，跳转h5地址="+"https://website.starpos.com.cn/member/?code="+code+"&openId="+oa.getOpenId()+"&qrCode="+qrCode);
-					response.sendRedirect("https://website.starpos.com.cn/member/?code="+code+"&openId="+oa.getOpenId()+"&qrCode="+qrCode);*/
-					
+					response.sendRedirect(appUrl);					
 				}else{
 					String posbuiUrl = PropertyInfoService.getMemberPosbuiUrl(code, oa.getOpenId(), payTotalAmt, deviceType, mercId, mercName, snNo, paychannel, txncnl);
 					log.info("==============[getMemberInfoAndUserOpenId]，会员-扫台牌，跳转h5地址="+posbuiUrl);
 					response.sendRedirect(posbuiUrl);
-					//测试环境跳转路径
-					/*log.info("==============[OAuthMemberServlet]测试环境，跳转h5地址="+"https://bystages-test.starpos.com.cn:9443/?code="+code+"&openId="+oa.getOpenId()+"&payTotalAmt="+payTotalAmt
-							 +"&deviceType="+deviceType+"&mercId="+mercId+"&mercName="+mercName+"&snNo="+snNo+"&paychannel="+paychannel+"&txncnl="+txncnl);
-					response.sendRedirect("https://bystages-test.starpos.com.cn:9443/?code="+code+"&openId="+oa.getOpenId()+"&payTotalAmt="+payTotalAmt
-							 +"&deviceType="+deviceType+"&mercId="+mercId+"&mercName="+mercName+"&snNo="+snNo+"&paychannel="+paychannel+"&txncnl="+txncnl);*/
-					 
-				  //生产环境跳转路径
-					/*log.info("==============[getMemberInfoAndUserOpenId]生产环境，跳转h5地址="+"https://website.starpos.com.cn/member/?code="+code+"&openId="+oa.getOpenId()+"&payTotalAmt="+payTotalAmt
-							 +"&deviceType="+deviceType+"&mercId="+mercId+"&mercName="+mercName+"&snNo="+snNo+"&paychannel="+paychannel+"&txncnl="+txncnl);
-					response.sendRedirect("https://website.starpos.com.cn/member/?code="+code+"&openId="+oa.getOpenId()+"&payTotalAmt="+payTotalAmt
-							 +"&deviceType="+deviceType+"&mercId="+mercId+"&mercName="+mercName+"&snNo="+snNo+"&paychannel="+paychannel+"&txncnl="+txncnl);*/
 				}
 				 
 			}else{
@@ -181,11 +172,11 @@ public class MemberInfoServiceImpl implements MemberInfoService{
  	    // 必填，生成签名的时间戳
         String timestamp = Long.toString(System.currentTimeMillis() / 1000); 
         // 必填，生成签名的随机串
-        String nonceStr = UUID.randomUUID().toString(); 
+        String nonceStr = UUID.randomUUID().toString();
         
         //获取前端传参url
         //encodeURIComponent编码转换 
-        String requestUrl = json.getString("url");
+        String requestUrl = URLDecoder.decode(json.getString("url"), "UTF-8");
         log.info("=== sendMemberShareCouponInfo 获取前端传参url：{}=========",requestUrl);
  		
         // 注意这里参数名必须全部小写，且必须有序

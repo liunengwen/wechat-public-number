@@ -40,12 +40,34 @@
 			var txncnl = getUrlParams("txncnl");
 			var sysCode = getUrlParams("sysCode");
 			var qrCode = getUrlParams("qrCode");
+			var v = getUrlParams("v"); //收银台进入 v:caishen 钱客多app进入:v:collectvisitor
 			$(document).ready(function() {
-				if(sysCode === "posbui"){
-					redirectPosPage()
-				}else if(sysCode === "app"){
-					redirectAppPage()
-				}
+				 var br = navigator.userAgent;
+			    if (br.indexOf("AlipayClient") > -1) {
+			     if(sysCode === "app"){
+			     	<!--测试环境appid-->
+			     		  var appid="2018011501878554";
+			     	<!--生产环境appid-->
+			     		  //var appid="";
+						  var requrl="http://";
+						  var name = encodeURIComponent(mercName);
+						  param="v="+v+"&mercId="+mercId+"&mercName="+name+"&payTotalAmt="+payTotalAmt+"&snNo="+snNo
+												+"&paychannel=ALIPAY&txncnl=T"+"&qrCode="+qrCode+"&requrl="+requrl;
+												redirect_uri="http://139.196.141.163:8380/sysmng/bmbuads1/test777.html?"+param;
+												redirect_uri=encodeURIComponent(redirect_uri);
+												var scope="auth_base";
+												window.location.href = "https://openauth.alipay.com/oauth2/publicAppAuthorize.htm?app_id="+appid+
+													"&scope="+scope+"&redirect_uri="+redirect_uri;
+			     }
+			      
+			    } else if (br.indexOf("MicroMessenger") > -1) {
+				      if(sysCode === "posbui"){
+							redirectPosPage()
+						}else if(sysCode === "app"){
+							redirectAppPage()
+						}
+			    }
+				
 				
 			});
 
@@ -59,7 +81,7 @@
 				self.location.replace(pos_href);
 			}
 			function redirectAppPage() {
-				var app_str = "qrCode="+qrCode+"/sysCode="+sysCode;
+				var app_str = "v="+v+"/qrCode="+qrCode+"/sysCode="+sysCode;
 				console.log(app_str)
 				<!--测试环境跳转地址-->
 				//var app_href = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxdc347549bbfb2a24&redirect_uri=http://invoice-weixin-test.starpos.com.cn/weixin/OAuthMemberServlet?str="+"["+app_str+"]"+"&response_type=code&scope=snsapi_base&state=HEAT#wechat_redirect";
